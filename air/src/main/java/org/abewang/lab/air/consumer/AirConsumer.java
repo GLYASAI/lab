@@ -4,14 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.abewang.lab.air.domain.AirReservation;
 import org.abewang.lab.air.service.BookingService;
 import org.abewang.lab.air.service.OrderCenterService;
-import org.abewang.lab.air.util.JsonUtil;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
-import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
-import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.remoting.common.RemotingHelper;
 import org.slf4j.Logger;
@@ -70,7 +67,6 @@ public class AirConsumer {
 
     public void consume() throws MQClientException {
         consumer.registerMessageListener((List<MessageExt> msgs, ConsumeConcurrentlyContext context) -> {
-            System.out.println(Thread.currentThread().getName() + " Receive new message: " + msgs + "%n");
             boolean result = true;
             for (MessageExt msg : msgs) {
                 try {
@@ -80,8 +76,8 @@ public class AirConsumer {
                     }
 
                     String messageBody = new String(msg.getBody(), RemotingHelper.DEFAULT_CHARSET);
-                    System.out.println(messageBody);
-                    System.out.println(msg.getTags());
+                    LOGGER.debug("Message body: {}", messageBody);
+                    LOGGER.debug("Tags: {}", msg.getTags());
                     if ("BOOKING_TAG".equals(msg.getTags())) {
                         result = saveBooking(messageBody);
                     } else if ("ORDER_CENTER_TAG".equals(msg.getTags())) {

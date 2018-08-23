@@ -21,18 +21,18 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public boolean saveBooking(AirReservation airReservation) {
-        System.out.println("正在保存PNR为" + airReservation.getPnr() + "的Booking...");
+        LOGGER.debug("正在保存PNR为{}的Booking...", airReservation.getPnr());
         if (pnrs.contains(airReservation.getPnr())) {  // RocketMQ可能会有重复消息, 这里保证消费逻辑的幂等性.
-            System.out.println("已存在" + airReservation.getPnr() + "这个Booking. 执行更新.");
+            LOGGER.debug("已存在{}这个Booking. 执行更新.", airReservation.getPnr());
         }
 //        boolean result = System.currentTimeMillis() % 2 == 0;
         boolean result = false;
         if (result) {
 //            pnrs.add(airReservation.getPnr());
-            System.out.println("保存成功.");
+            LOGGER.debug("保存成功.");
             return true;
         } else {
-            System.out.println("保存失败. 等待重试.");
+            LOGGER.debug("保存失败. 等待重试.");
             return false;
         }
     }
