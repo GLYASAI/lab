@@ -1,1 +1,8 @@
-metaNamesvrAddr: abe01:9876;abe02:9876
+rocketmq:
+  namesvrAddr: abe01:9876;abe02:9876
+  topic: AIR_TOPIC
+  tags: BOOKING_TAG || ORDER_CENTER_TAG
+  producer:
+    groupName: AIR_PRODUCER
+  consumer:
+      groupName: AIR_CONSUMER

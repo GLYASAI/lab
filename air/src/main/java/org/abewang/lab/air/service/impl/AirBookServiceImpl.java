@@ -27,14 +27,23 @@ public class AirBookServiceImpl implements AirBookService {
 
     private DefaultMQProducer producer = null;
 
-    @Value("${metaNamesvrAddr}")
+    @Value("${rocketmq.namesvrAddr}")
     private String metaNamesvrAddr;
+
+    @Value("${rocketmq.producer.groupName}")
+    private String groupName;
+
+    @Value("${rocketmq.topic}")
+    private String topic;
 
     @PostConstruct
     public void initMQProducer() {
-        producer = new DefaultMQProducer("air-producer-group");
+        producer = new DefaultMQProducer(groupName);
         producer.setNamesrvAddr(metaNamesvrAddr);
+        // 消息发送失败重试次数
         producer.setRetryTimesWhenSendFailed(3);
+        // 消息没有存储成功是否发送到另外一个broker
+        producer.setRetryAnotherBrokerWhenNotStoreOK(true);
         try {
             producer.start();
         } catch (MQClientException e) {
@@ -54,14 +63,15 @@ public class AirBookServiceImpl implements AirBookService {
     }
 
     public void sendMsg(String msg) {
-        Message bookingMsg = new Message("AIR_TOPIC", "BOOKING_TAG", msg.getBytes());
-        Message orderCenterMsg = new Message("AIR_TOPIC", "ORDER_CENTER_TAG", msg.getBytes());
+        Message bookingMsg = new Message(topic, "BOOKING_TAG", msg.getBytes());
+        Message orderCenterMsg = new Message(topic, "ORDER_CENTER_TAG", msg.getBytes());
         try {
-            SendResult bookingMsgResult = producer.send(bookingMsg);  // TODO
-            SendResult orderCenterMsgResult = producer.send(orderCenterMsg);  // TODO
+            SendResult bookingMsgResult = producer.send(bookingMsg);
+            SendResult orderCenterMsgResult = producer.send(orderCenterMsg);
             System.out.printf("%s%n", bookingMsgResult);
+            System.out.printf("%s%n", orderCenterMsgResult);
         } catch (Exception e) {
-            e.printStackTrace();  // TODO
+            LOGGER.error("Producer发送消息失败.", e);
         }
     }
 
