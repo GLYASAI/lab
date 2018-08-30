@@ -1,4 +1,6 @@
 server:
+  application:
+    name: air
   port: 8080
 
 logging:
